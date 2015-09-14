@@ -8,7 +8,7 @@ import cv2
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
-ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
+ap.add_argument("-a", "--min-area", type=int, default=640, help="minimum area size")
 args = vars(ap.parse_args())
 
 # if the video argument is None, then we are reading from webcam
@@ -31,9 +31,14 @@ while True:
 		break #change to exit program
 
 	# resize the frame, convert it to grayscale, and blur it
-	frame = imutils.resize(frame, width=500)
+	frame = imutils.resize(frame, width=640)
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = cv2.GaussianBlur(gray, (21, 21), 0)
+
+	#add help text (press a to accept)
+	text = "help"
+	cv2.putText(frame, "Press 'a' key to accept".format(text), (10, 20),
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
 	cv2.imshow("Select Background", frame)
 	#time.sleep(1)
@@ -45,6 +50,17 @@ while True:
 		firstFrame = gray
 		cv2.destroyWindow("Select Background")
 		break
+
+#store video from the frames captured.
+#fps = camera.get(CV_CAP_PROP_FPS)
+height, width, channels = frame.shape
+fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v')
+#fourcc = cv2.VideoWriter_fourcc(*'XVID')
+vw = cv2.VideoWriter("spy.avi", fourcc, 20, (width,height), 0)  #[, isColor]])
+
+if not vw:
+    print "!!! Failed VideoWriter: invalid parameters"
+    sys.exit(1)
 
 # loop over the frames of the video
 while True:
@@ -59,7 +75,7 @@ while True:
 		break
 
 	# resize the frame, convert it to grayscale, and blur it
-	frame = imutils.resize(frame, width=500)
+	frame = imutils.resize(frame, width=640)
 	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	gray = cv2.GaussianBlur(gray, (21, 21), 0)
 		
@@ -103,6 +119,10 @@ while True:
 	if key == ord("q"):
 		break
 
+	#store the frame
+	vw.write(frame)
+
 # cleanup the camera and close any open windows
+vw.release()
 camera.release()
 cv2.destroyAllWindows()
