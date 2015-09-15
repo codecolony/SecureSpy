@@ -7,5 +7,5 @@ A low cost personal security surveilance system which costs only a cheap web cam
 - Any usb web cam
 - A computer with some space for video storage
 
-#Current work in progress
+##Current work in progress
 I'm trying to compress video using ffmpeg. 
