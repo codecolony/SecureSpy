@@ -4,16 +4,23 @@ import datetime
 import imutils
 import time
 import cv2
+import subprocess as sp
+import os.path
+
+#Initialize variables
+FFMPEG_BIN = "ffmpeg" # on Linux ans Mac OS
+#FFMPEG_BIN = "ffmpeg.exe" # on Windows
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
-ap.add_argument("-a", "--min-area", type=int, default=640, help="minimum area size")
+ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
+ap.add_argument("-c", "--enable-compression", type=int, default=1, help="enable or disable video compression")
 args = vars(ap.parse_args())
 
 # if the video argument is None, then we are reading from webcam
 if args.get("video", None) is None:
-	camera = cv2.VideoCapture(0)
+	camera = cv2.VideoCapture(-1) #use 0 from inbuilt webcam
 	time.sleep(0.25)
 
 # otherwise, we are reading from a video file
@@ -67,7 +74,7 @@ while True:
 	# grab the current frame and initialize the occupied/unoccupied
 	# text
 	(grabbed, frame) = camera.read()
-	text = "Unoccupied"
+	text = "Not Recording"
 
 	# if the frame could not be grabbed, then we have reached the end
 	# of the video
@@ -99,22 +106,53 @@ while True:
 
 		# compute the bounding box for the contour, draw it on the frame,
 		# and update the text
-		(x, y, w, h) = cv2.boundingRect(c)
-		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-		text = "Occupied"
-
-		#store the frame
-		vw.write(frame)
+		#####(x, y, w, h) = cv2.boundingRect(c)
+		#####cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+		text = "Recording"
 
 	# draw the text and timestamp on the frame
-	cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
+	cv2.putText(frame, "Status: {}".format(text), (10, 20),
 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 	cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
 		(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
+	#store the frame
+	if text == "Recording":
+		#store the frame
+		if args["enable_compression"] == 0:
+			vw.write(frame)
+		
+		else:
+		#ffmpeg -i ./outimg/depth%d.png -vcodec png depth.mov
+		#store frame as image on disk.
+		#sp.call( ["ffmpeg", "-i", "frame.png", "-vcodec png depth.mov"])
+			cv2.imwrite("frame.bmp", frame)
+
+			time.sleep(0.15)
+
+			if os.path.isfile("depth.mov") is False:
+
+				#use frame to create video
+				sp.call( ["ffmpeg", "-i", "frame.bmp", "-vcodec", "png", "depth.mov"])
+				#print "depth.mov created"
+
+			else:
+				sp.call( ["ffmpeg", "-i", "frame.bmp", "-vcodec", "png", "depth1.mov"])
+				#print "depth1.mov created"
+				#concat two videos
+				#cat INPUT1.avi INPUT2.avi > MERGEDFILE.avi
+				#ffmpeg -i concat:"input1|input2" -codec copy output
+				#ffmpeg -f concat -i mylist.txt -c copy output
+				#sp.call( ["ffmpeg", "-i", "\"concat:depth1.mov|depth.mov\"", "-codec", "copy", "output"])
+				sp.call( ["ffmpeg", "-f", "concat","-i", "mylist.txt","-c", "copy", "depth.mov" , "-y"])
+				sp.call(["rm", "depth1.mov"])
+
+			#delete temporary image created from frame
+			sp.call(["rm", "frame.bmp"])
+
 	# show the frame and record if the user presses a key
-	cv2.imshow("Security Feed", frame)
-	cv2.imshow("Thresh", thresh)
+	#cv2.imshow("Security Feed", frame)
+	#cv2.imshow("Thresh", thresh)
 	cv2.imshow("Frame Delta", frameDelta)
 	key = cv2.waitKey(1) & 0xFF
 
