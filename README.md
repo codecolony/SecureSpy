@@ -32,7 +32,7 @@ A low cost personal security surveilance system which costs only a cheap web cam
 
 ##SecureSpy Installation
 Clone the files using the below command <br>
-git clone https://github.com/codecolony/SecureSpy
+`git clone https://github.com/codecolony/SecureSpy`
 
 ##Working with SecureSpy
 Just use command `python spy_windows.py` to run it with defaults. See next section for available options
