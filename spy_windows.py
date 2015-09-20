@@ -75,11 +75,18 @@ height, width, channels = frame.shape
 sens = args.get("sensitivity", None)
 codec = args.get("codec_selection", None)
 
-print "codec option selected: " + codec
+#extract compression options
+#print "codec option selected: " + codec
 if codec != "auto":
 	fourcc = -1
 else:
 	fourcc = cv2.VideoWriter_fourcc(*'FMP4')
+
+#extract sensitivity input options
+if sens is None:
+	sens = 2
+elif sens > 5:
+	sens = 5
 
 vw = cv2.VideoWriter("spy.avi", fourcc, 20, (width,height), 1)  #[, isColor]])
 
@@ -109,7 +116,7 @@ while True:
 	# compute the absolute difference between the current frame and
 	# first frame
 	frameDelta = cv2.absdiff(firstFrame, gray)
-	thresh = cv2.threshold(frameDelta, 100, 255, cv2.THRESH_BINARY)[1]
+	thresh = cv2.threshold(frameDelta, 50, 255, cv2.THRESH_BINARY)[1]
 
 	# dilate the thresholded image to fill in holes, then find contours
 	# on thresholded image
@@ -120,9 +127,9 @@ while True:
 	# loop over the contours
 	for c in cnts:
 		# if the contour is too small, ignore it
-		if cv2.contourArea(c) < args["min_area"] * 2:
+		if cv2.contourArea(c) < args["min_area"]:
 			elapsed_time = time.time() - start_time
-			if elapsed_time > (5 * 60):
+			if elapsed_time > (3 * 60):
 				#grab new start frame
 				(grabbed, frame) = camera.read()
 				# resize the frame, convert it to grayscale, and blur it
