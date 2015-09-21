@@ -5,7 +5,7 @@ A low cost personal security surveilance system which costs only a cheap web cam
 - Python 2.7
 - numpy and scipy python libraries
 - OpenCV
-- x264 encoder
+- x264 encoder (optional)
 - Any usb web cam
 - A computer with some space for video storage
 
@@ -28,7 +28,10 @@ A low cost personal security surveilance system which costs only a cheap web cam
   https://www.youtube.com/watch?v=U49CVY8yOxw
 
 - Installing x264 encoder <br>
-  > Windows - Download installer from http://sourceforge.net/projects/x264vfw/ and install it.
+  > Windows - Download installer from http://sourceforge.net/projects/x264vfw/ and install it. <br>
+You can omit this step if you have large capacity to store videos but I highly recommend using it as it compresses video to very good extent and without any delay.
+<br><br>
+Possible issues without encoding: The video size may not grow beyond 4 GB and this could be a restriction of the file system or the hardware. I'm still investigating on this.
 
 ##SecureSpy Installation
 Clone the files using the below command <br>
