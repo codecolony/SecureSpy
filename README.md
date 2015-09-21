@@ -14,7 +14,7 @@ A low cost personal security surveilance system which costs only a cheap web cam
   https://www.youtube.com/watch?v=gD4eulxGNok
 
 - Installing numpy and scipy modules <br>
-  https://www.youtube.com/watch?v=ddpYVA-7wq4
+  https://www.youtube.com/watch?v=ddpYVA-7wq4 <br>
   https://www.youtube.com/watch?v=zPMr0lEMqpo
 
 - Installing OpenCV
