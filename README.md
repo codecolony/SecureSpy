@@ -1,11 +1,12 @@
 # SecureSpy
-A low cost personal security surveilance system which costs only a cheap web cam and a standard computer or laptop.
+A low cost personal security surveillance system which costs only a cheap web cam and a standard computer or laptop.
 
 ##Prerequisites
 - Python 2.7
 - numpy and scipy python libraries
 - OpenCV
-- x264 encoder
+- x264 encoder (optional)
+- Git (if you don't already have it)
 - Any usb web cam
 - A computer with some space for video storage
 
@@ -14,7 +15,7 @@ A low cost personal security surveilance system which costs only a cheap web cam
   https://www.youtube.com/watch?v=gD4eulxGNok
 
 - Installing numpy and scipy modules <br>
-  https://www.youtube.com/watch?v=ddpYVA-7wq4
+  https://www.youtube.com/watch?v=ddpYVA-7wq4 <br>
   https://www.youtube.com/watch?v=zPMr0lEMqpo
 
 - Installing OpenCV
@@ -28,14 +29,23 @@ A low cost personal security surveilance system which costs only a cheap web cam
   https://www.youtube.com/watch?v=U49CVY8yOxw
 
 - Installing x264 encoder <br>
-  > Windows - Download installer from http://sourceforge.net/projects/x264vfw/ and install it.
+  > Windows - Download installer from http://sourceforge.net/projects/x264vfw/ and install it. <br>
+You can omit this step if you have large capacity to store videos but I highly recommend using it as it compresses video to very good extent and without any delay.
+<br><br>
+Possible issues without encoding: The video size may not grow beyond 4 GB and this could be a restriction of the file system or the hardware. I'm still investigating on this.
 
 ##SecureSpy Installation
 Clone the files using the below command <br>
 `git clone https://github.com/codecolony/SecureSpy`
 
 ##Working with SecureSpy
-Just use command `python spy_windows.py` to run it with defaults. See next section for available options
+Just use command `python spy_windows.py` to run it with defaults. See next section for available options. <br>
+<br>
+Initially, it will ask for the background situation of the surveillance location. This is typically the scene where there is no or less movement so that the tool can capture only when there is action in the scene. Press `a` to accept the initial background frame. <br>
+
+The tool automatically grabs a new still frame every 3 minutes (duration customizable soon). This helps with environment changes like a car stopping in the scene for hours or shadow changes due to sun movement.
+
+Your video is stored in the current working directory with name `spy.avi`. This name will be customizable soon.
 
 ##Options supported
 - `-v ` default is `i` which stands for inbuilt webcam (ex. laptop); Use `e` for external webcam
