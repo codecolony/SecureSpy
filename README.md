@@ -45,9 +45,9 @@ Just use command `python spy_windows.py` to run it with defaults. See next secti
 <br>
 Initially, it will ask for the background situation of the surveillance location. This is typically the scene where there is no or less movement so that the tool can capture only when there is action in the scene. Press `a` to accept the initial background frame. <br>
 
-The tool automatically grabs a new still frame every 3 minutes (duration customizable soon). This helps with environment changes like a car stopping in the scene for hours or shadow changes due to sun movement.
+The tool automatically grabs a new still frame every 3 minutes by default which can be overridden (See next section). This helps with environment changes like a car stopping in the scene for hours or shadow changes due to sun movement.
 
-Your video is stored in the current working directory with name `spy.avi`. This name will be customizable soon.
+Your video is stored in the current working directory with name `<timestamp>.avi` (unless you specifically use a custom name. Check next section for details).
 
 ##Options supported
 - `-v ` default is `i` which stands for inbuilt webcam (ex. laptop); Use `e` for external webcam
