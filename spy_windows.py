@@ -7,6 +7,8 @@ import cv2
 import subprocess as sp
 import os.path
 import sys
+import platform
+#from cv2 import __version__
 
 #Initialize variables
 RED_COLOR = (0, 0, 255)
@@ -25,8 +27,15 @@ ap.add_argument("-fps", "--frames-per-second",  default=20, help="frames per sec
 ap.add_argument("-log", "--debug-log",  default="false", help="output log to screen")
 args = vars(ap.parse_args())
 
+#get the underlying platform
+pName = platform.system()
+
 #get log parameter
 debg = args.get("debug_log", None)
+
+if debg == "true":
+	print "Platform: " + pName
+	print "Opencv Version: " + str(cv2.__version__)
 
 #get file name from arguments
 fname = args.get("file_name", None) #default <timestamp>.avi
@@ -45,7 +54,10 @@ if args.get("video", None) is None:
 elif args.get("video", None) is "i":
 	video = 0
 else:
-	video = 1 #external webcam in windows. Try -1 in linux or mac.
+	if pName == "Windows":
+		video = 1 #external webcam in windows. 
+	else:
+		video = -1 #Try -1 in linux or mac.
 
 if debg == "true":
 	print "video input from: " + "in-built webcam" if video is 0 else "external webcam"
@@ -98,9 +110,24 @@ codec = args.get("codec_selection", None)
 #extract compression options
 #print "codec option selected: " + codec
 if codec != "auto":
-	fourcc = -1
+	if pName == "Windows":
+		fourcc = -1
+	else:
+		if cv2.__version__ == "3.0.0":
+			fourcc = cv2.VideoWriter_fourcc(*'XVID')
+		else:
+			fourcc = cv2.cv.CV_FOURCC('x', 'v', 'i', 'd') #use this if using opencv < 3
 else:
-	fourcc = cv2.VideoWriter_fourcc(*'FMP4')
+	if pName == "Windows":
+		if cv2.__version__ == "3.0.0":
+			fourcc = cv2.VideoWriter_fourcc(*'FMP4')
+		else:
+			fourcc = cv2.cv.CV_FOURCC('F', 'M', 'P', '4') #use this if using opencv < 3
+	else:
+		if cv.__version__ == "3.0.0":
+			fourcc = cv2.VideoWriter_fourcc(*'XVID')
+		else:
+			fourcc = cv2.cv.CV_FOURCC('x', 'v', 'i', 'd') #use this if using opencv < 3
 
 if debg == "true":
 	print "Codec preference: " + codec
@@ -160,8 +187,13 @@ while True:
 	# dilate the thresholded image to fill in holes, then find contours
 	# on thresholded image
 	thresh = cv2.dilate(thresh, None, iterations=2)
-	(_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-		cv2.CHAIN_APPROX_SIMPLE)
+
+	if cv2.__version__ == "3.0.0":
+		(_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+			cv2.CHAIN_APPROX_SIMPLE)
+	else:
+		(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+			cv2.CHAIN_APPROX_SIMPLE)
 
 	# loop over the contours
 	for c in cnts:
