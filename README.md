@@ -1,11 +1,12 @@
 # SecureSpy
-A low cost personal security surveilance system which costs only a cheap web cam and a standard computer or laptop.
+A low cost personal security surveillance system which costs only a cheap web cam and a standard computer or laptop.
 
 ##Prerequisites
 - Python 2.7
 - numpy and scipy python libraries
 - OpenCV
 - x264 encoder (optional)
+- Git (if you don't already have it)
 - Any usb web cam
 - A computer with some space for video storage
 
@@ -38,7 +39,13 @@ Clone the files using the below command <br>
 `git clone https://github.com/codecolony/SecureSpy`
 
 ##Working with SecureSpy
-Just use command `python spy_windows.py` to run it with defaults. See next section for available options
+Just use command `python spy_windows.py` to run it with defaults. See next section for available options. <br>
+<br>
+Initially, it will ask for the background situation of the surveillance location. This is typically the scene where there is no or less movement so that the tool can capture only when there is action in the scene. Press `a` to accept the initial background frame. <br>
+
+The tool automatically grabs a new still frame every 3 minutes (duration customizable soon). This helps with environment changes like a car stopping in the scene for hours or shadow changes due to sun movement.
+
+Your video is stored in the current working directory with name `spy.avi`. This name will be customizable soon.
 
 ##Options supported
 - `-v ` default is `i` which stands for inbuilt webcam (ex. laptop); Use `e` for external webcam
