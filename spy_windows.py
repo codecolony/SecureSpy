@@ -18,17 +18,37 @@ ap.add_argument("-v", "--video", default="i", help="in-built webcam or external"
 ap.add_argument("-s", "--sensitivity", help="sensitivity to motion in picture 1-5 from most to least")
 ap.add_argument("-c", "--codec-selection", default = "auto", help="manual or auto codec selection") # -1 for manual selection in windows
 ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
+ap.add_argument("-r", "--refresh-time", type=int, default=3, help="time in minutes to grab a fresh Background frame")
+ap.add_argument("-f", "--file-name",  default="<timestamp>.avi", help="output file name")
+ap.add_argument("-clr", "--color-output",  default="true", help="color video output or monochrome")
+ap.add_argument("-fps", "--frames-per-second",  default=20, help="frames per seconds for output file")
+ap.add_argument("-log", "--debug-log",  default="false", help="output log to screen")
 args = vars(ap.parse_args())
 
-# if the video argument is None, then we are reading from webcam
-#if args.get("video", None) is None:
+#get log parameter
+debg = args.get("debug_log", None)
 
+#get file name from arguments
+fname = args.get("file_name", None) #default <timestamp>.avi
+
+if fname is None or "<timestamp>.avi":
+	#create file name from timestamp
+	ts = time.time()
+	fname = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S') + ".avi"
+
+if debg == "true":
+	print "Output file name: " + fname
+
+# if the video argument is None, then we are reading from inbuilt webcam
 if args.get("video", None) is None:
 	video = 0  #default in-built camera
 elif args.get("video", None) is "i":
 	video = 0
 else:
 	video = 1 #external webcam in windows. Try -1 in linux or mac.
+
+if debg == "true":
+	print "video input from: " + "in-built webcam" if video is 0 else "external webcam"
 
 camera = cv2.VideoCapture(video)
 time.sleep(0.25)
@@ -82,17 +102,36 @@ if codec != "auto":
 else:
 	fourcc = cv2.VideoWriter_fourcc(*'FMP4')
 
+if debg == "true":
+	print "Codec preference: " + codec
+
 #extract sensitivity input options
 if sens is None:
 	sens = 2
 elif sens > 5:
 	sens = 5
 
-vw = cv2.VideoWriter("spy.avi", fourcc, 20, (width,height), 1)  #[, isColor]])
+if debg == "true":
+	print "sensitivity: " + str(sens)
+
+#get fps details
+fps = args.get("frames_per_second", None) #default 20
+
+if debg == "true":
+	print "FPS: " + str(fps)
+
+vw = cv2.VideoWriter(fname, fourcc, fps, (width,height), 1)  #[, isColor]])
 
 if not vw:
     print "!!! Failed VideoWriter: invalid parameters"
     sys.exit(1)
+
+
+#get refresh time interval
+rtime = args.get("refresh_time", None)
+
+if debg == "true":
+	print "Background refresh interval: " + str(rtime) + " minutes"
 
 # loop over the frames of the video
 while True:
@@ -116,7 +155,7 @@ while True:
 	# compute the absolute difference between the current frame and
 	# first frame
 	frameDelta = cv2.absdiff(firstFrame, gray)
-	thresh = cv2.threshold(frameDelta, 50, 255, cv2.THRESH_BINARY)[1]
+	thresh = cv2.threshold(frameDelta, 80, 255, cv2.THRESH_BINARY)[1]
 
 	# dilate the thresholded image to fill in holes, then find contours
 	# on thresholded image
@@ -129,7 +168,7 @@ while True:
 		# if the contour is too small, ignore it
 		if cv2.contourArea(c) < args["min_area"]:
 			elapsed_time = time.time() - start_time
-			if elapsed_time > (3 * 60):
+			if elapsed_time > (rtime * 60):
 				#grab new start frame
 				(grabbed, frame) = camera.read()
 				# resize the frame, convert it to grayscale, and blur it
