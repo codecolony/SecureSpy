@@ -3,7 +3,7 @@ A low cost personal security surveillance system which costs only a cheap web ca
 
 ##Prerequisites
 - Python 2.7
-- numpy and scipy python libraries
+- numpy, scipy & imutils python libraries
 - OpenCV
 - x264 encoder (optional)
 - Git (if you don't already have it)
@@ -14,9 +14,11 @@ A low cost personal security surveillance system which costs only a cheap web ca
 - Installing Python 2.7. Refer the link below <br>
   https://www.youtube.com/watch?v=gD4eulxGNok
 
-- Installing numpy and scipy modules <br>
-  https://www.youtube.com/watch?v=ddpYVA-7wq4 <br>
-  https://www.youtube.com/watch?v=zPMr0lEMqpo
+- Installing dependent python modules <br>
+  Open command prompt or terminal and navigate to "scripts" folder within your python folder (ex: c:\python27\scripts) <br>
+  Type `pip install numpy` to install numpy <br>
+  Type `pip install scipy` to install scipy <br>
+  Type `pip install imutils` to install imutils <br>
 
 - Installing OpenCV
   1. On Windows <br>
@@ -49,9 +51,14 @@ Your video is stored in the current working directory with name `spy.avi`. This 
 
 ##Options supported
 - `-v ` default is `i` which stands for inbuilt webcam (ex. laptop); Use `e` for external webcam
-- `-c ` default is `auto` which means automatic x264 video encoding; Use `manual` to get a list of available codec on the system to encode the video.
+- `-c ` default is `auto` which means automatic x264 video encoding; Use `manual` to get a list of available codec on the system to encode the video. (manual currently works only on windows)
 - `-a` default is `500` which is minimum area on video activity; Smaller number means minor acivities are captured
 - `-s` default is `2` which denotes video motion sensitivity; 1 = more sensitive; 5 = less sensitive
+- `-r` default is `3` minutes. This controls when a new background frame needs to be grabbed.
+- `-f` default is `<timestamp>.avi`. This is the output video file name.
+- `-clr` default is `true`. This controls whether output video is stored in color or monochrome.
+- `-fps` default is `20`. This is the frames per seconds captured in the output video.
+- `-log` default is `false`. Use it to see diagnostic log messages.
 
 ex. Running with external webcam, auto compression of video, area sensitivity of 400 pixels and total sensitivity of 1 (very sensitive) <br>
 `python spy_windows.py -v e -c auto -a 400 -s 1`
