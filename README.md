@@ -2,9 +2,9 @@
 A low cost personal security surveillance system which costs only a cheap web cam and a standard computer or laptop.
 
 ##Prerequisites
-- Python 2.7
+- Python 2.7.x
 - numpy, scipy & imutils python libraries
-- OpenCV
+- OpenCV (v 3.0.0 recommended)
 - x264 encoder (optional)
 - Git (if you don't already have it)
 - Any usb web cam
