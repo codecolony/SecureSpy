@@ -41,7 +41,7 @@ Clone the files using the below command <br>
 `git clone https://github.com/codecolony/SecureSpy`
 
 ##Working with SecureSpy
-Just use command `python spy_windows.py` to run it with defaults. See next section for available options. <br>
+Just use command `python securespy.py` to run it with defaults. See next section for available options. <br>
 <br>
 Initially, it will ask for the background situation of the surveillance location. This is typically the scene where there is no or less movement so that the tool can capture only when there is action in the scene. Press `a` to accept the initial background frame. <br>
 
@@ -61,7 +61,7 @@ Your video is stored in the current working directory with name `<timestamp>.avi
 - `-log` default is `false`. Use it to see diagnostic log messages.
 
 ex. Running with external webcam, auto compression of video, area sensitivity of 400 pixels and total sensitivity of 1 (very sensitive) <br>
-`python spy_windows.py -v e -c auto -a 400 -s 1`
+`python securespy.py -v e -c auto -a 400 -s 1`
 
 ##Current work in progress
 Bug fixes and stability
