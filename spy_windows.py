@@ -43,8 +43,10 @@ fname = args.get("file_name", None) #default <timestamp>.avi
 if fname is None or "<timestamp>.avi":
 	#create file name from timestamp
 	ts = time.time()
-	fname = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S') + ".avi"
-
+	if pName == "Windows":
+		fname = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S') + ".avi"
+	else:
+		fname = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S') + ".avi"
 if debg == "true":
 	print "Output file name: " + fname
 
@@ -124,10 +126,10 @@ else:
 		else:
 			fourcc = cv2.cv.CV_FOURCC('F', 'M', 'P', '4') #use this if using opencv < 3
 	else:
-		if cv.__version__ == "3.0.0":
-			fourcc = cv2.VideoWriter_fourcc(*'XVID')
+		if cv2.__version__ == "3.0.0":
+			fourcc = cv2.VideoWriter_fourcc(*'MP4V')
 		else:
-			fourcc = cv2.cv.CV_FOURCC('x', 'v', 'i', 'd') #use this if using opencv < 3
+			fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v') #use this if using opencv < 3
 
 if debg == "true":
 	print "Codec preference: " + codec
