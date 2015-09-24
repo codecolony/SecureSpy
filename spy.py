@@ -6,79 +6,36 @@ import time
 import cv2
 import subprocess as sp
 import os.path
-import sys
-import platform
-#from cv2 import __version__
 
 #Initialize variables
-RED_COLOR = (0, 0, 255)
-GREEN_COLOR = (0, 255, 0)
+FFMPEG_BIN = "ffmpeg" # on Linux ans Mac OS
+#FFMPEG_BIN = "ffmpeg.exe" # on Windows
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", default="i", help="in-built webcam or external")
-ap.add_argument("-s", "--sensitivity", help="sensitivity to motion in picture 1-5 from most to least")
-ap.add_argument("-c", "--codec-selection", default = "auto", help="manual or auto codec selection") # -1 for manual selection in windows
+ap.add_argument("-v", "--video", help="path to the video file")
 ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
-ap.add_argument("-r", "--refresh-time", type=int, default=3, help="time in minutes to grab a fresh Background frame")
-ap.add_argument("-f", "--file-name",  default="<timestamp>.avi", help="output file name")
-ap.add_argument("-clr", "--color-output",  default="true", help="color video output or monochrome")
-ap.add_argument("-fps", "--frames-per-second",  default=20, help="frames per seconds for output file")
-ap.add_argument("-log", "--debug-log",  default="false", help="output log to screen")
+ap.add_argument("-c", "--enable-compression", type=int, default=1, help="enable or disable video compression")
 args = vars(ap.parse_args())
 
-#get the underlying platform
-pName = platform.system()
-
-#get log parameter
-debg = args.get("debug_log", None)
-
-if debg == "true":
-	print "Platform: " + pName
-	print "Opencv Version: " + str(cv2.__version__)
-
-#get file name from arguments
-fname = args.get("file_name", None) #default <timestamp>.avi
-
-if fname is None or "<timestamp>.avi":
-	#create file name from timestamp
-	ts = time.time()
-	if pName == "Windows":
-		fname = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S') + ".avi"
-	else:
-		fname = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d%H%M%S') + ".avi"
-if debg == "true":
-	print "Output file name: " + fname
-
-# if the video argument is None, then we are reading from inbuilt webcam
+# if the video argument is None, then we are reading from webcam
 if args.get("video", None) is None:
-	video = 0  #default in-built camera
-elif args.get("video", None) is "i":
-	video = 0
+	camera = cv2.VideoCapture(-1) #use 0 from inbuilt webcam
+	time.sleep(0.25)
+
+# otherwise, we are reading from a video file
 else:
-	if pName == "Windows":
-		video = 1 #external webcam in windows. 
-	else:
-		video = -1 #Try -1 in linux or mac.
-
-if debg == "true":
-	print "video input from: " + "in-built webcam" if video is 0 else "external webcam"
-
-camera = cv2.VideoCapture(video)
-time.sleep(0.25)
+	camera = cv2.VideoCapture(args["video"])
 
 # initialize the first frame in the video stream
 firstFrame = None
-
-#print "video initialization done"
 
 #set first frame
 while True:
 	(grabbed, frame) = camera.read()
 
 	if not grabbed:
-		print "No video feed... exiting!"
-		sys.exit(1)
+		break #change to exit program
 
 	# resize the frame, convert it to grayscale, and blur it
 	frame = imutils.resize(frame, width=500)
@@ -88,7 +45,7 @@ while True:
 	#add help text (press a to accept)
 	text = "help"
 	cv2.putText(frame, "Press 'a' key to accept".format(text), (10, 20),
-		cv2.FONT_HERSHEY_SIMPLEX, 0.5, GREEN_COLOR, 2)
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
 	cv2.imshow("Select Background", frame)
 	#time.sleep(1)
@@ -99,68 +56,18 @@ while True:
 	if key == ord("a"):
 		firstFrame = gray
 		cv2.destroyWindow("Select Background")
-		start_time = time.time()
 		break
 
 #store video from the frames captured.
+#fps = camera.get(CV_CAP_PROP_FPS)
 height, width, channels = frame.shape
-#fourcc = cv2.cv.CV_FOURCC('x', '2', '6', '4') #use this if using opencv < 3
-
-sens = args.get("sensitivity", None)
-codec = args.get("codec_selection", None)
-
-#extract compression options
-#print "codec option selected: " + codec
-if codec != "auto":
-	if pName == "Windows":
-		fourcc = -1
-	else:
-		if cv2.__version__ == "3.0.0":
-			fourcc = cv2.VideoWriter_fourcc(*'XVID')
-		else:
-			fourcc = cv2.cv.CV_FOURCC('x', 'v', 'i', 'd') #use this if using opencv < 3
-else:
-	if pName == "Windows":
-		if cv2.__version__ == "3.0.0":
-			fourcc = cv2.VideoWriter_fourcc(*'FMP4')
-		else:
-			fourcc = cv2.cv.CV_FOURCC('F', 'M', 'P', '4') #use this if using opencv < 3
-	else:
-		if cv2.__version__ == "3.0.0":
-			fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-		else:
-			fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v') #use this if using opencv < 3
-
-if debg == "true":
-	print "Codec preference: " + codec
-
-#extract sensitivity input options
-if sens is None:
-	sens = 2
-elif sens > 5:
-	sens = 5
-
-if debg == "true":
-	print "sensitivity: " + str(sens)
-
-#get fps details
-fps = args.get("frames_per_second", None) #default 20
-
-if debg == "true":
-	print "FPS: " + str(fps)
-
-vw = cv2.VideoWriter(fname, fourcc, fps, (width,height), 1)  #[, isColor]])
+fourcc = cv2.cv.CV_FOURCC('m', 'p', '4', 'v')
+#fourcc = cv2.VideoWriter_fourcc(*'XVID')
+vw = cv2.VideoWriter("spy.avi", fourcc, 20, (width,height), 0)  #[, isColor]])
 
 if not vw:
     print "!!! Failed VideoWriter: invalid parameters"
     sys.exit(1)
-
-
-#get refresh time interval
-rtime = args.get("refresh_time", None)
-
-if debg == "true":
-	print "Background refresh interval: " + str(rtime) + " minutes"
 
 # loop over the frames of the video
 while True:
@@ -168,7 +75,6 @@ while True:
 	# text
 	(grabbed, frame) = camera.read()
 	text = "Not Recording"
-	color = GREEN_COLOR
 
 	# if the frame could not be grabbed, then we have reached the end
 	# of the video
@@ -184,33 +90,18 @@ while True:
 	# compute the absolute difference between the current frame and
 	# first frame
 	frameDelta = cv2.absdiff(firstFrame, gray)
-	thresh = cv2.threshold(frameDelta, 80, 255, cv2.THRESH_BINARY)[1]
+	thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
 
 	# dilate the thresholded image to fill in holes, then find contours
 	# on thresholded image
 	thresh = cv2.dilate(thresh, None, iterations=2)
-
-	if cv2.__version__ == "3.0.0":
-		(_, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-			cv2.CHAIN_APPROX_SIMPLE)
-	else:
-		(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-			cv2.CHAIN_APPROX_SIMPLE)
+	(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
+		cv2.CHAIN_APPROX_SIMPLE)
 
 	# loop over the contours
 	for c in cnts:
 		# if the contour is too small, ignore it
 		if cv2.contourArea(c) < args["min_area"]:
-			elapsed_time = time.time() - start_time
-			if elapsed_time > (rtime * 60):
-				#grab new start frame
-				(grabbed, frame) = camera.read()
-				# resize the frame, convert it to grayscale, and blur it
-				frame = imutils.resize(frame, width=500)
-				gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-				gray = cv2.GaussianBlur(gray, (21, 21), 0)
-				firstFrame = gray
-				start_time = time.time()
 			continue
 
 		# compute the bounding box for the contour, draw it on the frame,
@@ -218,28 +109,57 @@ while True:
 		#####(x, y, w, h) = cv2.boundingRect(c)
 		#####cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 		text = "Recording"
-		color = RED_COLOR
 
 	# draw the text and timestamp on the frame
 	cv2.putText(frame, "Status: {}".format(text), (10, 20),
-		cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 	cv2.putText(frame, datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
-		(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, color, 1)
+		(10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
 
 	#store the frame
 	if text == "Recording":
 		#store the frame
-		vw.write(frame)
+		if args["enable_compression"] == 0:
+			vw.write(frame)
 		
+		else:
+		#ffmpeg -i ./outimg/depth%d.png -vcodec png depth.mov
+		#store frame as image on disk.
+		#sp.call( ["ffmpeg", "-i", "frame.png", "-vcodec png depth.mov"])
+			cv2.imwrite("frame.bmp", frame)
+
+			time.sleep(0.15)
+
+			if os.path.isfile("depth.mov") is False:
+
+				#use frame to create video
+				sp.call( ["ffmpeg", "-i", "frame.bmp", "-vcodec", "png", "depth.mov"])
+				#print "depth.mov created"
+
+			else:
+				sp.call( ["ffmpeg", "-i", "frame.bmp", "-vcodec", "png", "depth1.mov"])
+				#print "depth1.mov created"
+				#concat two videos
+				#cat INPUT1.avi INPUT2.avi > MERGEDFILE.avi
+				#ffmpeg -i concat:"input1|input2" -codec copy output
+				#ffmpeg -f concat -i mylist.txt -c copy output
+				#sp.call( ["ffmpeg", "-i", "\"concat:depth1.mov|depth.mov\"", "-codec", "copy", "output"])
+				sp.call( ["ffmpeg", "-f", "concat","-i", "mylist.txt","-c", "copy", "depth.mov" , "-y"])
+				sp.call(["rm", "depth1.mov"])
+
+			#delete temporary image created from frame
+			sp.call(["rm", "frame.bmp"])
+
 	# show the frame and record if the user presses a key
-	cv2.imshow("Security Feed", frame)
+	#cv2.imshow("Security Feed", frame)
 	#cv2.imshow("Thresh", thresh)
-	#cv2.imshow("Frame Delta", frameDelta)
+	cv2.imshow("Frame Delta", frameDelta)
 	key = cv2.waitKey(1) & 0xFF
 
 	# if the `q` key is pressed, break from the lop
 	if key == ord("q"):
 		break
+	
 
 # cleanup the camera and close any open windows
 vw.release()
